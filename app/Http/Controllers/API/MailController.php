@@ -13,7 +13,7 @@ use Validator;
 class MailController extends Controller
 {
     public function sendMail(Request $request) {
-
+       
         // Validates the user input
         // Validation is being done for required fields only
         $validator = Validator::make($request->all(), [

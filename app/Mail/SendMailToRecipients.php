@@ -38,16 +38,21 @@ class SendMailToRecipients extends Mailable
 
         if($this->attach_ment  != '') {
             if(!is_array($this->attach_ment)) {
-                $this->attach($this->attach_ment->getRealPath(), [
-                    'as' => $this->attach_ment->getClientOriginalName(),
-                    'mime' => $this->attach_ment->getMimeType(),
-                ]);
-            } else {
-                foreach($this->attach_ment as $attached) {
-                    $this->attach($attached->getRealPath(), [
-                        'as' => $attached->getClientOriginalName(),
-                        'mime' => $attached->getMimeType(),
+                if(file_exists($this->attach_ment)) {
+                    $this->attach($this->attach_ment->getRealPath(), [
+                        'as' => $this->attach_ment->getClientOriginalName(),
+                        'mime' => $this->attach_ment->getMimeType(),
                     ]);
+                }
+            } else {
+                if(file_exists($this->attach_ment)) {
+
+                    foreach($this->attach_ment as $attached) {
+                        $this->attach($attached->getRealPath(), [
+                            'as' => $attached->getClientOriginalName(),
+                            'mime' => $attached->getMimeType(),
+                        ]);
+                    }
                 }
             }
         }
