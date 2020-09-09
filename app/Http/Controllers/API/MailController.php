@@ -83,7 +83,7 @@ class MailController extends Controller
         //    }
         } elseif (count($recipients) > 0 ) {
             // try {
-                $this->mailRecipient($recipients, $cc, $request->subject, $request->content, $attachment);
+                $this->mailRecipient($request->subject, $recipients, $request->content, $attachment);
                 return $this->respondSent([
                     'message' => 'Mail sent successfully', 
                     'details' => [
