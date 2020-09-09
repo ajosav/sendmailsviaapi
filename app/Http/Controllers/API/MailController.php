@@ -13,7 +13,7 @@ use Validator;
 class MailController extends Controller
 {
     public function sendMail(Request $request) {
-        
+
         // Validates the user input
         // Validation is being done for required fields only
         $validator = Validator::make($request->all(), [
@@ -69,7 +69,7 @@ class MailController extends Controller
             }
         }
         if(count($recipients) > 0 && count($cc) > 0) {
-            try {
+            // try {
                $this->mailRecipientCC($recipients, $cc, $request->subject, $request->content, $attachment);
                 return $this->respondSent([
                     'message' => 'Mail sent successfully', 
@@ -78,11 +78,11 @@ class MailController extends Controller
                         'ill_emails' => $illEmails
                     ]
                 ]);
-           } catch(Exception $e) {
-               return $this->respondError('Error Sending Email', $e, 400);
-           }
+        //    } catch(Exception $e) {
+        //        return $this->respondError('Error Sending Email', $e, 400);
+        //    }
         } elseif (count($recipients) > 0 ) {
-            try {
+            // try {
                 $this->mailRecipient($recipients, $cc, $request->subject, $request->content, $attachment);
                 return $this->respondSent([
                     'message' => 'Mail sent successfully', 
@@ -91,9 +91,9 @@ class MailController extends Controller
                         'ill_emails' => $illEmails
                     ]
                 ]);
-            } catch(Exception $e) {
-                return $this->respondError('Error Sending Email', $e, 400);
-            }
+            // } catch(Exception $e) {
+            //     return $this->respondError('Error Sending Email', $e, 400);
+            // }
         } else {
             return $this->respondError('Failed sending mail to recipient', ["recipients" => $illEmails], 400);
         }
