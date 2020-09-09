@@ -47,7 +47,7 @@ class SendMailToRecipients extends Mailable
             } else {
                 
                 foreach($this->attach_ment as $attached) {
-                    if(file_exists($this->attach_ment)) {
+                    if(file_exists($attached)) {
                         $this->attach($attached->getRealPath(), [
                             'as' => $attached->getClientOriginalName(),
                             'mime' => $attached->getMimeType(),
