@@ -19,7 +19,7 @@ class SendMailToRecipients extends Mailable
      *
      * @return void
      */
-    public function __construct($subject = '', $body = "", $attachments)
+    public function __construct($subject = '', $body = "", $attachments = [])
     {
         $this->subject = $subject;
         $this->body = $body;
@@ -36,7 +36,7 @@ class SendMailToRecipients extends Mailable
         $this->subject($this->subject)
                 ->markdown('emails.send_mail');
 
-        if($this->attach_ment != '') {
+        if($this->attach_ment  !='') {
             if(!is_array($this->attach_ment)) {
                 $this->attach($this->attach_ment->getRealPath(), [
                     'as' => $this->attach_ment->getClientOriginalName(),
