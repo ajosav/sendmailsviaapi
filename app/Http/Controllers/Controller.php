@@ -69,6 +69,7 @@ class Controller extends BaseController
     protected function respondError($message, $details, $statusCode)
     {
         return $this->respond([
+            'status' => 'failed',
             'message' => $message,
             'errors' => [
                 'details' => $details,

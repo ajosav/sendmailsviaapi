@@ -55,6 +55,7 @@ class Handler extends ExceptionHandler
         }
         if($request->wantsJson()) {
             return response()->json([
+                'status' => 'failed',
                 'message' => $exception->getMessage(),
                 'errors' => [
                     'details' => $exception->getMessage(),

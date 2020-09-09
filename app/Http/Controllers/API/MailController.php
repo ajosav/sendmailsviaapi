@@ -5,13 +5,18 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Mail\SendMailToRecipients;
+use App\Traits\ProcessBase64Trait;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\File;
 use Validator;
 
 class MailController extends Controller
 {
+    use ProcessBase64Trait;
+
     public function sendMail(Request $request) {
        
         // Validates the user input
@@ -27,7 +32,6 @@ class MailController extends Controller
             return $this->respondError('Validation failed', $validator->errors(), 422);
         }
 
-        //  set an empty array for ill emails
         $illEmails = [];
         $cc = [];
 
@@ -46,6 +50,11 @@ class MailController extends Controller
             }
         }
 
+        $mailCategory = '';
+
+        if($request->category) {
+            $mailCategory = $request->category;
+        }
         
         // initialize empty attachment
         $attachment = '';
@@ -53,7 +62,7 @@ class MailController extends Controller
         if($request->attachment ) {
             $attached_req = is_array($request->attachment) ? !empty($request->attachment) : $request->attachment != "";
             if($attached_req) {
-                $attachment = $request->file('attachment');
+                $attachment = $request->attachment;
             }
         }
         
@@ -70,8 +79,9 @@ class MailController extends Controller
         }
         if(count($recipients) > 0 && count($cc) > 0) {
             // try {
-               $this->mailRecipientCC($recipients, $cc, $request->subject, $request->content, $attachment);
+               $this->mailRecipientCC($recipients, $cc, $request->subject, $request->content, $attachment, $mailCategory);
                 return $this->respondSent([
+                    'status' => 'success',
                     'message' => 'Mail sent successfully', 
                     'details' => [
                         'successfully_sent' => count($recipients),
@@ -83,8 +93,9 @@ class MailController extends Controller
         //    }
         } elseif (count($recipients) > 0 ) {
             // try {
-                $this->mailRecipient($request->subject, $recipients, $request->content, $attachment);
+                $this->mailRecipient($request->subject, $recipients, $request->content, $attachment, $mailCategory);
                 return $this->respondSent([
+                    'status' => 'success',
                     'message' => 'Mail sent successfully', 
                     'details' => [
                         'successfully_sent' => count($recipients),
@@ -106,7 +117,7 @@ class MailController extends Controller
 
     }
 
-    public function mailRecipientCC($to, $cc, $subject, $body, $attachment = '') {
+    public function mailRecipientCC($to, $cc, $subject, $body, $attachment = '', $mailCategory) {
         // foreach($to as $recipient) {
         // Mail::send('emails.send_mail', ['body' => $body], function($control) use($to, $cc, $subject) {
         //     $control->to($to)
@@ -114,15 +125,15 @@ class MailController extends Controller
         // });
         Mail::to($to)
             ->cc($cc)
-            ->send(new SendMailToRecipients($subject, $body, $attachment));
+            ->send(new SendMailToRecipients($subject, $body, $attachment, $mailCategory));
         Log::log('critical', Mail::failures());
            
         // }
     }
-    public function mailRecipient($subject, $to, $body, $attachment = '') {
+    public function mailRecipient($subject, $to, $body, $attachment = '', $mailCategory) {
        
         Mail::to($to)
-        ->send(new SendMailToRecipients($subject, $body, $attachment));
+        ->send(new SendMailToRecipients($subject, $body, $attachment, $mailCategory));
         Log::log('critical', Mail::failures());
     }
 }
