@@ -3,7 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Throwable;
+use Exception;
 
 class Handler extends ExceptionHandler
 {
@@ -27,14 +27,14 @@ class Handler extends ExceptionHandler
     ];
 
     /**
-     * Report or log an exception.
+    * Report or log an exception.
      *
-     * @param  \Throwable  $exception
+     * @param  \Exception  $exception
      * @return void
      *
      * @throws \Exception
      */
-    public function report(Throwable $exception)
+    public function report(Exception $exception)
     {
         parent::report($exception);
     }
@@ -48,7 +48,7 @@ class Handler extends ExceptionHandler
      *
      * @throws \Throwable
      */
-    public function render($request, Throwable $exception)
+    public function render($request, Exception $exception)
     {
         if($request->is('api/*')) {
             $request->headers->set('accept', 'application/json');
