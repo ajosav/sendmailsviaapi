@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use App\Traits\ProcessBase64Trait;
+use Exception;
 
 class SendMailToRecipients extends Mailable
 {
@@ -61,38 +62,20 @@ class SendMailToRecipients extends Mailable
         
         if($this->attach_ment  != '') {
             if(!is_array($this->attach_ment)) {
-                $this->attachData($this->extractfile($this->attach_ment['path']), [
-                    'as' => $this->attach_ment['filename'],
-                    'mime' => $this->attach_ment['contentType']
-                    ]);
-                } else {
+                
+                $this->attachFileToMail($this->attach_ment);
+                
+            } else {
                     
                 foreach($this->attach_ment as $attached) {
-                   
-                    $this->attachData($this->extractfile($attached['path']), $attached['filename'], [
-                        'mime' => $attached['contentType']
-                    ]);
+
+                    $this->attachFileToMail($attached);
+                    // $this->attachData($this->extractfile($attached['path']), $attached['filename'], [
+                    //     'mime' => $attached['contentType']
+                    // ]);
                 }
             }
 
-            // if(!is_array($this->attach_ment)) {
-            //     if(file_exists($this->attach_ment)) {
-            //         $this->attach($this->attach_ment->getRealPath(), [
-            //             'as' => $this->attach_ment->getClientOriginalName(),
-            //             'mime' => $this->attach_ment->getMimeType(),
-            //         ]);
-            //     }
-            // } else {
-                
-            //     foreach($this->attach_ment as $attached) {
-            //         if(file_exists($attached)) {
-            //             $this->attach($attached->getRealPath(), [
-            //                 'as' => $attached->getClientOriginalName(),
-            //                 'mime' => $attached->getMimeType(),
-            //             ]);
-            //         }
-            //     }
-            // }
         }
         return $this;
         
@@ -113,24 +96,28 @@ class SendMailToRecipients extends Mailable
         return wordwrap($json, 76, "\n   ");
     }
 
-    private function getFileFromString($string_file) {
+    private function attachFileToMail($string_or_file) {
         
-        $fileLoaded = $this->extractfile($string_file);
-
-            // Gather information about the image using the GD library
-        $size = getImageSizeFromString($fileLoaded);
-
-        // Check the MIME type to be sure that the binary data is an image
-        if (empty($size['mime']) || strpos($size['mime'], 'image/') !== 0) {
-            die('Base64 value is not a valid image');
+        if(@is_file($string_or_file)) {
+            return $this->attach($string_or_file->getRealPath(), [
+                        'as' => $string_or_file->getClientOriginalName(),
+                        'mime' => $string_or_file->getMimeType(),
+                    ]);
+        } else {
+            if(is_array($string_or_file) && array_key_exists('path', $string_or_file) && array_key_exists('filename', $string_or_file) && array_key_exists('contentType', $string_or_file)) {
+               if (base64_encode(base64_decode($string_or_file['path'], true)) === $string_or_file['path']){
+                    return $this->attachData($this->extractfile($string_or_file['path']), $string_or_file['filename'], [
+                        'as' => $string_or_file['filename'],
+                        'mime' => $string_or_file['contentType']
+                    ]);
+                } else {
+                    throw new Exception('Path is expects a base64 encoded image format');
+                } 
+            } else {
+                throw new Exception('Please include a file path or use a base64encoded data');
+                
+            }
+           
         }
-
-
-        // Mime types are represented as image/gif, image/png, image/jpeg, and so on
-        // Therefore, to extract the image extension, we subtract everything after the “image/” prefix
-        $ext =  substr($size['mime'], strpos($size['mime'], "/") + 1); 
-
-        // Make sure that you save only the desired file extensions
-        return $ext;
     }
 }
