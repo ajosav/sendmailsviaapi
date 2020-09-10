@@ -39,7 +39,6 @@ class SendMailToRecipients extends Mailable
         $validateCat = is_array($this->category) ? !empty($this->category) : $this->category != "";
 
         if($validateCat) {
-            dd($this->category);
             $headerData = [
                 'category' => $this->category,
                 // 'unique_args' => [
